@@ -8,10 +8,11 @@ import os
 import xlrd
 from xlutils.copy import copy
 
+from config import basedir
 
 @login_required
 def get_excel(request, file_name):
-    f = open('files/excel/{}'.format(file_name), 'rb')
+    f = open(basedir+'/files/excel/{}'.format(file_name), 'rb')
     return FileResponse(f)
 
 @login_required
@@ -26,7 +27,7 @@ def get_answers_excel(request, index):
 
     main_excel_file = Excel.objects.get(lang="ru").file
 
-    book = xlrd.open_workbook("files/"+str(main_excel_file))
+    book = xlrd.open_workbook(basedir+"/files/"+str(main_excel_file))
     new_book = copy(book)
     sh = book.sheet_by_index(0)
     w = new_book.get_sheet(0)

@@ -9,6 +9,7 @@ from app.functions import list_to_text
 import os
 import xlrd
 from django.contrib.auth.decorators import login_required 
+from config import basedir
 
 @login_required
 def upload_file(request):
@@ -20,7 +21,7 @@ def upload_file(request):
             excel = Excel.objects.get(lang=lang)
             excel.file = bbf.cleaned_data['file']
             excel.save()
-            book = xlrd.open_workbook('files/{}'.format(str(excel.file)))
+            book = xlrd.open_workbook(basedir+'/files/{}'.format(str(excel.file)))
             sh = book.sheet_by_index(0)
 
             print(sh.cell_value(195, 3))
