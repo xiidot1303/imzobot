@@ -1,0 +1,43 @@
+{% extends 'layout/basic.html' %}
+{% load static %}
+
+{% block title %}
+
+Загрузить файл
+{% endblock %}
+
+{% block section %}
+<div class="box">
+    <div class="box-body">
+        <form method = "post" enctype="multipart/form-data" class="login-form" autocomplete="off">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="col-md-6 col-sm-12">
+                <div class="form-group">
+                  
+                  {{ field.errors }} 
+                  {{ field.label_tag }} {{ field }}
+
+            </div>
+        </div>
+        {% endfor %}
+            
+            
+            
+            <div class="col-md-6 col-sm-12">
+                <div class="form-buttons">
+                    <input class="save-button btn btn-flat bg-orange" id="submit" name="submit" type="submit" value="OK">
+                </div>
+                </div>   
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+
+function text() {
+    alert('wait')
+}
+
+{% endblock %}

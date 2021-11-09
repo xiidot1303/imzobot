@@ -1,0 +1,199 @@
+{% extends 'layout/basic.html' %}
+{% load index %}
+{% load static %}
+{% load table_th %}
+{% load table_multi %}
+
+{% block link %}
+<link rel="stylesheet" href="{% static 'app/add.css' %}">
+{% endblock %}
+
+
+
+
+{% block title %}
+{{ title }}
+{% endblock %}
+
+
+{% block h3 %}
+{{ title }}
+{% endblock %}
+
+
+{% block section %}
+
+<div class="row add-button">
+    <div class="col-xs-4">
+           <a href="{% url 'get_answers_excel' index %}" class="btn btn-flat bg-orange"><i class="fas fa-file-excel-o"></i>Скачать Excel</a>
+            
+
+       </div>
+</div>
+
+<div class="row">
+    <div class="col-xs-12">
+        <div class="box">
+            <div class="box-body table-responsive no-padding">
+                <table class="table table-hover" id="userTable">
+                    <thead>
+                        <tr>
+                            <th>№</th>
+                            
+                            <th>Раздел</th>
+                            <th>Вопрос</th>
+                            <th>Ответ</th>
+
+                    </thead>
+
+
+
+                    <tbody>
+                        {% for a in answers %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            
+                            <td>{{ a.st }}</td>
+                            <td>{{ a.qn }}</td>
+                            {% if a.sn == 2 and a.qn == 1 %}
+                                <td><a id = "a"  class="btn btn-danger btn-flat bg-yellow" onclick="add({{ a.pk|table_th }})"><i class="fas fa-eye" aria-hidden="true"></i></a></td>
+                            {% elif a.sn == 3 and a.qn == 1 %}
+                            <td><a id = "a"  class="btn btn-danger btn-flat bg-yellow" onclick="add({{ a.pk|table_th }})"><i class="fas fa-eye" aria-hidden="true"></i></a></td>
+                            
+                            {% elif a.sn == 3 and a.qn == 16 %}
+                            <td><a id = "a"  class="btn btn-danger btn-flat bg-yellow" onclick="add({{ a.pk|table_th }})"><i class="fas fa-eye" aria-hidden="true"></i></a></td>
+                            
+                            {% elif a.sn == 3 and a.qn == 17 %}
+                            <td><a id = "a"  class="btn btn-danger btn-flat bg-yellow" onclick="add({{ a.pk|table_multi }})"><i class="fas fa-eye" aria-hidden="true"></i></a></td>
+                            
+                            
+                            {% else %}
+                            <td>{{ a.ans }}</td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+{% endblock %}
+
+
+
+
+{% block script %}
+<script>
+
+
+
+function add(pk) {
+    
+    var parent = document.getElementsByClassName("content container-fluid")[0];
+    var contain = document.createElement("div");
+    contain.setAttribute("class", "contain");
+    
+    
+    function remove() {
+        var parent = document.getElementsByClassName("content container-fluid")[0];
+        var contain = document.getElementsByClassName("contain")[0];
+        parent.removeChild(contain);
+        
+    }
+
+    var section = document.createElement("section");
+    section.setAttribute("class", "section");
+
+
+    var x = document.createElement("div");
+    x.setAttribute("class", "x");
+    x.addEventListener("click", remove);
+    i = document.createElement("i");
+    i.setAttribute("class", "far fa-times-circle i");
+    x.appendChild(i);
+    
+    var row = document.createElement("div");
+    row.setAttribute("class", "row div");
+    
+    var col_xs_12 = document.createElement("div");
+    col_xs_12.setAttribute("class", "col-xs-12");
+    
+    var box = document.createElement("div");
+    box.setAttribute("class", "box");
+    
+    var box_body = document.createElement("div");
+    box_body.setAttribute("class", "box-body table-responsive no-padding");
+    
+    var table = document.createElement("table");
+    table.setAttribute("class", "table table-hover");
+    table.setAttribute("id", "userTable");
+    
+    var thead = document.createElement("thead");
+    
+    
+    var tr = document.createElement("tr");
+    
+    
+    
+    // var th_text = ["diuwebd", "euudwe", "eiwubd"];
+    var th_text = pk[0];
+
+    for (var i = 0; i < th_text.length; i++) {
+        var th = document.createElement("th");
+        var node = document.createTextNode(th_text[i])
+        th.appendChild(node);
+        tr.appendChild(th);
+    }
+    
+    thead.appendChild(tr);
+    
+    var tbody = document.createElement("tbody");
+    // start loop
+    tr_list = pk[1];
+    for (var r = 0; r < tr_list.length; r++) {
+        var tr = document.createElement("tr");
+        for (var d = 0; d < tr_list[r].length; d++) {
+            
+            var td = document.createElement("td");
+            var node = document.createTextNode(tr_list[r][d]);
+            td.appendChild(node);
+            tr.appendChild(td);
+        }
+        tbody.appendChild(tr);
+    }
+    
+
+    
+    // stop loop
+    
+    
+    table.appendChild(thead);
+    table.appendChild(tbody);
+    box_body.appendChild(table);
+    box.appendChild(box_body);
+    col_xs_12.appendChild(box);
+    row.appendChild(col_xs_12);
+    section.appendChild(row);
+    contain.appendChild(x);
+    contain.appendChild(section);
+    parent.appendChild(contain);
+    
+    
+    
+    
+
+}
+
+
+</script>
+
+{% endblock %}
+
+
+
+
