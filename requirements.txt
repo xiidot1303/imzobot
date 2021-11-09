@@ -2,7 +2,6 @@ python-telegram-bot
 django
 python-dotenv
 requests
-pandas
 xlrd
 datetime
 xlutils
