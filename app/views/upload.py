@@ -6,7 +6,6 @@ from app.forms import *
 from app.models import *
 from app.functions import list_to_text
 
-import pandas as pd
 import os
 import xlrd
 from django.contrib.auth.decorators import login_required 
