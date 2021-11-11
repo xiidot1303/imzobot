@@ -17,6 +17,7 @@
                         <tr>
                             <th>№</th>
                             <th>Пользователь</th>
+                            <th>Номер телефона</th>
                             <th>Дата</th>
                         </tr>
                     </thead>
@@ -28,6 +29,7 @@
                         <tr>
                             <td>{{ forloop.counter }}</td>
                             <td>{{ users|index:forloop.counter0 }}</td>   
+                            <td>{{ numbers|index:forloop.counter0 }}</td>   
                             <td>{{ a.date|date:"d.M.Y H:i" }}</td>
                             <td><a id = "a" href="{% url 'report_answer' a.pk %}"  class="btn btn-danger btn-flat bg-yellow"><i class="fas fa-eye" aria-hidden="true"></i></a>
                                 <a id = "a" href="{% url 'get_answers_excel' a.pk %}"  class="btn btn-danger btn-flat bg-red"><i class="fas fa-download" aria-hidden="true"></i></a></td>

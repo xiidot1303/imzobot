@@ -46,7 +46,7 @@ def loop_answering(update, context):
 
     next_q = sections_and_questions[sections_and_questions.index((l_ans.sn, l_ans.qn)) + 1] # next question (sn, qn)
     
-    if not answer in get_variants_as_list(l_q.qv) and (l_ans.sn, l_ans.qn) != (2, 3) and (l_ans.sn, l_ans.qn) != (2, 4) and (l_ans.sn, l_ans.qn) != (2, 10)and (l_ans.sn, l_ans.qn) != (3, 2)and not ((l_ans.sn, l_ans.qn) in [(1, 2), (3, 3), (3, 4), (3, 5), (3, 6), (3, 7), (3, 8), (3, 9), (3, 10), (3, 11), (3, 12), (3, 13), (3, 14), (3, 15), (4, 2), (4, 4) ]):
+    if not answer in get_variants_as_list(l_q.qv) and (l_ans.sn, l_ans.qn) != (2, 3) and (l_ans.sn, l_ans.qn) != (2, 4) and (l_ans.sn, l_ans.qn) != (2, 10)and (l_ans.sn, l_ans.qn) != (3, 2)and not ((l_ans.sn, l_ans.qn) in [(1, 2), (1, 3), (3, 3), (3, 4), (3, 5), (3, 6), (3, 7), (3, 8), (3, 9), (3, 10), (3, 11), (3, 12), (3, 13), (3, 14), (3, 15), (4, 2), (4, 4) ]):
         update.message.reply_text(get_word('send again', update))
         return 
     elif (l_ans.sn, l_ans.qn) == (1, 2):
@@ -102,7 +102,10 @@ def loop_answering(update, context):
             stop_answering(update.message.chat.id)
             main_menu(update, context)
             return ConversationHandler.END
-
+        elif not answer in get_variants_as_list(l_q.qv) and answer != get_word('city_chirchik', update) and answer != get_word('city_gulistan', update):
+        
+            update.message.reply_text(get_word('send again', update))
+            return 
 
     elif (l_ans.sn, l_ans.qn) == (4, 1):
         if answer != get_variants_as_list(l_q.qv)[0]:
@@ -211,6 +214,13 @@ def loop_answering(update, context):
         bot.send_message(update.message.chat.id, str(q.qd)+add_text, reply_markup = InlineKeyboardMarkup(inline_button))
         Answer.objects.create(index = l_ans.index, end=False, user = user, st = q.st, sn = q.sn, qn = q.qn, ans='')
         return INLINE_ANSWERING
+    
+    elif next_q == (1, 3):
+        keys = get_variants_for_buttons(q.qv)
+        keys.insert(-1, [get_word('city_chirchik', update)])
+        keys.insert(-1, [get_word('city_gulistan', update)])
+        update.message.reply_text(str(q.qd)+add_text, reply_markup=ReplyKeyboardMarkup(keyboard=keys, resize_keyboard=True))
+    
     else:
         update.message.reply_text(str(q.qd)+add_text, reply_markup=ReplyKeyboardMarkup(keyboard=get_variants_for_buttons(q.qv), resize_keyboard=True))
     

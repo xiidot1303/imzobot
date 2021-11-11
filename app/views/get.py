@@ -31,8 +31,11 @@ def get_answers_excel(request, index):
     new_book = copy(book)
     sh = book.sheet_by_index(0)
     w = new_book.get_sheet(0)
-    
-
+    ans_index = Answer_index.objects.get(pk=index)
+    first_ans = Answer.objects.filter(index=index)[0]
+    w.write(0, 0, '{} {}'.format(first_ans.user.name, ans_index.date.date()))
+    w.write(0, 1, first_ans.user.phone)
+    w.write(0, 2, 'ID: {}'.format(index))
     for a in Answer.objects.filter(index=index):
         q = Question.objects.get(sn=a.sn, qn=a.qn, lang = a.user.lang)
         

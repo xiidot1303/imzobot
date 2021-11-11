@@ -10,7 +10,13 @@ def report_by_index(request):
     for a in answers:
         username = Bot_user.objects.get(user_id = a.user_id).name
         users.append(username)
-    context = {'answers': answers, 'users': users}
+    numbers = []
+    for a in answers:
+        phone = Bot_user.objects.get(user_id = a.user_id).phone
+        numbers.append(phone)
+
+
+    context = {'answers': answers, 'users': users, 'numbers': numbers}
     return render(request, 'report/by_index.html', context)
 
 
@@ -20,5 +26,6 @@ def report_answer(request, pk):
 
     a = answers[0]
     title = '{} {}.{}.{}'.format(a.user.name, a.date.day, a.date.month, a.date.year)
-    context = {'answers': answers, 'title': title, 'index': pk}
+    desc = '{} / {} / {}.{}.{}'.format(a.user.name, a.user.phone, a.date.day, a.date.month, a.date.year)
+    context = {'answers': answers, 'title': title, 'desc': desc, 'index': pk}
     return render(request, 'report/answer.html', context)
