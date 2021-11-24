@@ -307,8 +307,11 @@ def inline_answering(update, context):
 
 
                 add_text = '\n\n'
-                index = 1
                 
+                for i in var_answers:
+                    add_text += '{}   '.format(i)
+                add_text += '\n\n'
+                index = 1
                 for i in variants:
                     add_text += '\n{}.{}'.format(index, i)
                     index += 1
@@ -405,6 +408,12 @@ def inline_answering(update, context):
         inline_button.append([InlineKeyboardButton(text=get_word('next', update), callback_data='next_question')])
 
         add_text = '\n\n'
+
+        for i in var_answers:
+            add_text += '{}   '.format(i)
+        add_text += '\n\n'
+
+
         index = 1
         if not (sn == 3 and qn == 16) and not (sn == 3 and qn == 17):
             for i in var_answers:
