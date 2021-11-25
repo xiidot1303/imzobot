@@ -24,6 +24,9 @@ def take_question(update, context):
     return CONTINUE_ANSWERING
 
 
+alpha = ['a','b', 'c', 'd', 'e', 'f', 'g']
+
+
 @is_start
 def loop_answering(update, context):
     bot = context.bot
@@ -46,7 +49,7 @@ def loop_answering(update, context):
 
     next_q = sections_and_questions[sections_and_questions.index((l_ans.sn, l_ans.qn)) + 1] # next question (sn, qn)
     
-    if not answer in get_variants_as_list(l_q.qv) and (l_ans.sn, l_ans.qn) != (2, 3) and (l_ans.sn, l_ans.qn) != (2, 4) and (l_ans.sn, l_ans.qn) != (2, 10)and (l_ans.sn, l_ans.qn) != (3, 2)and not ((l_ans.sn, l_ans.qn) in [(1, 2), (1, 3), (3, 3), (3, 4), (3, 5), (3, 6), (3, 7), (3, 8), (3, 9), (3, 10), (3, 11), (3, 12), (3, 13), (3, 14), (3, 15), (4, 2), (4, 4) ]):
+    if not answer in l_q.qv and (l_ans.sn, l_ans.qn) != (2, 3) and (l_ans.sn, l_ans.qn) != (2, 4) and (l_ans.sn, l_ans.qn) != (2, 10)and (l_ans.sn, l_ans.qn) != (3, 2)and not ((l_ans.sn, l_ans.qn) in [(1, 2), (1, 3), (3, 3), (3, 4), (3, 5), (3, 6), (3, 7), (3, 8), (3, 9), (3, 10), (3, 11), (3, 12), (3, 13), (3, 14), (3, 15), (4, 2), (4, 4) ]):
         update.message.reply_text(get_word('send again', update))
         return 
     elif (l_ans.sn, l_ans.qn) == (1, 2):
@@ -336,11 +339,14 @@ def inline_answering(update, context):
                     for al in ans_list:
                         if int(ans_list[al]) != 4:
                             var_answers.append(al)
+
+                    
                     for v in range(1, len(variants)+1):
                         part = []
                         part.append(InlineKeyboardButton(text=v, callback_data='nothing'))
+                        
                         for i in var_answers:
-                            part.append(InlineKeyboardButton(text=str(i), callback_data='{}_{}_{}_{}'.format(q.sn, q.qn, v, i)))  # section number _ question nummber _ variant name _ answer
+                            part.append(InlineKeyboardButton(text=alpha[var_answers.index(i)], callback_data='{}_{}_{}_{}'.format(q.sn, q.qn, v, i)))  # section number _ question nummber _ variant name _ answer
                         inline_button.append(part)
                 inline_button.append([InlineKeyboardButton(text=get_word('next', update), callback_data='next_question')])
 
@@ -348,7 +354,7 @@ def inline_answering(update, context):
                 add_text = '\n\n'
                 if next_q == (3, 17):
                     for i in var_answers:
-                        add_text += '{}   '.format(i)
+                        add_text += '{}.{}   '.format(alpha[var_answers.index(i)], i)
                     add_text += '\n\n'
                     index = 1
                     for i in variants:
@@ -422,6 +428,7 @@ def inline_answering(update, context):
         inline_button = []
 
 
+        a = ['a','b', 'c', 'd', 'e', 'f', 'g']
         if (sn == 3 and qn == 16):
             part = []
             for v in variants:
@@ -429,10 +436,9 @@ def inline_answering(update, context):
             inline_button.append(part)
             for i in var_answers:
                 part = []
-                a = ['a','b', 'c', 'd', 'e', 'f', 'g']
                 for v in variants:
                     text = str(int(float(i)))
-                    if (text == ans and v == vn) or '{}={}'.format(v, text) in l_ans.ans:
+                    if (text == ans and v == vn) or '{}={};'.format(v, text) in l_ans.ans:
                         part.append(InlineKeyboardButton(text=text + ' 🔘', callback_data='{}_{}_{}_{}'.format(this_q.sn, this_q.qn, v, text)))
                     else:
                         part.append(InlineKeyboardButton(text=text, callback_data='{}_{}_{}_{}'.format(this_q.sn, this_q.qn, v, text)))
@@ -452,13 +458,13 @@ def inline_answering(update, context):
                     for i in var_answers:
                         if str(index) in list_ans:
                             if i in list_ans[str(index)]:
-                                part.append(InlineKeyboardButton(text=str(i) + ' 🔘', callback_data='{}_{}_{}_{}'.format(this_q.sn, this_q.qn, str(index), i)))  # section number _ question nummber _ variant name _ answer
+                                part.append(InlineKeyboardButton(text=alpha[var_answers.index(i)] + '🔘', callback_data='{}_{}_{}_{}'.format(this_q.sn, this_q.qn, str(index), i)))  # section number _ question nummber _ variant name _ answer
 
                             else:
 
-                                part.append(InlineKeyboardButton(text=str(i), callback_data='{}_{}_{}_{}'.format(this_q.sn, this_q.qn, str(index), i)))  # section number _ question nummber _ variant name _ answer
+                                part.append(InlineKeyboardButton(text=alpha[var_answers.index(i)], callback_data='{}_{}_{}_{}'.format(this_q.sn, this_q.qn, str(index), i)))  # section number _ question nummber _ variant name _ answer
                         else:
-                            part.append(InlineKeyboardButton(text=str(i), callback_data='{}_{}_{}_{}'.format(this_q.sn, this_q.qn, str(index), i)))  # section number _ question nummber _ variant name _ answer
+                            part.append(InlineKeyboardButton(text=alpha[var_answers.index(i)], callback_data='{}_{}_{}_{}'.format(this_q.sn, this_q.qn, str(index), i)))  # section number _ question nummber _ variant name _ answer
                     index += 1
 
 
@@ -466,7 +472,7 @@ def inline_answering(update, context):
                     part.append(InlineKeyboardButton(text=v, callback_data='nothing'))
                     for i in range(1, len(var_answers)+1):
                         if (str(i) == ans and v == vn) or '{}={}'.format(v, i) in l_ans.ans:
-                            part.append(InlineKeyboardButton(text=str(i) + ' 🔘', callback_data='{}_{}_{}_{}'.format(this_q.sn, this_q.qn, v, i)))  # section number _ question nummber _ variant name _ answer
+                            part.append(InlineKeyboardButton(text=str(i) + '🔘', callback_data='{}_{}_{}_{}'.format(this_q.sn, this_q.qn, v, i)))  # section number _ question nummber _ variant name _ answer
 
                         else:
 
@@ -482,13 +488,13 @@ def inline_answering(update, context):
                 add_text += '\n{}.{}'.format(index, i)
                 index += 1
         if (sn == 3 and qn == 17):
+            for i in var_answers:
+                add_text += '{}.{}   '.format(alpha[var_answers.index(i)], i)
+            add_text += '\n\n'
             for i in variants:
                 add_text += '\n{}.{}'.format(index, i)
                 index += 1
 
-            for i in var_answers:
-                add_text += '{}   '.format(i)
-            add_text += '\n\n'
         elif (sn == 3 and qn == 16):
             a = ['a','b', 'c', 'd', 'e', 'f', 'g']
             for i in variants:
