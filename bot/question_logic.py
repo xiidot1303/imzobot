@@ -218,7 +218,11 @@ def loop_answering(update, context):
                 # part.append(InlineKeyboardButton(text=v, callback_data='nothing'))
                 for i in range(1, len(var_answers)+1):
                     part.append(InlineKeyboardButton(text=str(i), callback_data='{}_{}_{}_{}'.format(q.sn, q.qn, v, i)))  # section number _ question nummber _ variant name _ answer
+                    if len(part) == 5:
+                        inline_button.append(part)
+                        part = []        
                 inline_button.append(part)
+                add_text = '\n\n🔸   0️⃣    <b>{}</b>    🔟    🔹'.format(v)
                 break
 
 
@@ -234,17 +238,14 @@ def loop_answering(update, context):
         bot.delete_message(update.message.chat.id, del_msg.message_id)
 
 
-        add_text = '\n\n'
         index = 1
         if next_q != (3, 16):
+            add_text = '\n\n'
             for i in var_answers:
                 add_text += '\n{}.{}'.format(index, i)
                 index += 1
-        else:
-            a = ['a','b', 'c', 'd', 'e', 'f', 'g']
-            for i in variants:
-                add_text += '{}.{}    '.format(a[variants.index(i)], i) 
-        bot.send_message(update.message.chat.id, str(q.qd)+add_text, reply_markup = InlineKeyboardMarkup(inline_button))
+        
+        bot.send_message(update.message.chat.id, str(q.qd)+add_text, reply_markup = InlineKeyboardMarkup(inline_button), parse_mode=telegram.ParseMode.HTML)
         Answer.objects.create(index = l_ans.index, end=False, user = user, st = q.st, sn = q.sn, qn = q.qn, ans='')
         return INLINE_ANSWERING
     
@@ -266,7 +267,7 @@ def inline_answering(update, context):
 
     update = update.callback_query
     user = get_user_by_id(update.message.chat.id)
-    if update.data == 'next_question':
+    if 'next_question' in update.data:
         current_answer = Answer.objects.get(user__user_id = user.user_id, end=False)
         current_question = Question.objects.get(sn = current_answer.sn, qn = current_answer.qn, lang=user.lang)
         answers = variants_to_list(current_answer.ans)
@@ -280,8 +281,11 @@ def inline_answering(update, context):
                 if int(ans_list[al]) != 4:
                     variants.append(al)
             required_answers = variants
-    
-        if len(answers) == len(required_answers) or (int(current_answer.sn) == 3 and int(current_answer.qn) == 17):
+        if '-' in str(update.data):
+            sth_text, index_of_ = str(update.data).split('-')
+        else:
+            index_of_ = '0'
+        if len(answers) == len(required_answers) or ((int(current_answer.sn) == 3 and int(current_answer.qn) == 17  and 7 <= int(index_of_))):
             current_answer.end = True
             current_answer.save()
             bot.delete_message(update.message.chat.id, update.message.message_id)
@@ -333,23 +337,18 @@ def inline_answering(update, context):
                             variants.append(al)
                     
                     part = []
-                    # a = ['a','b', 'c', 'd', 'e', 'f', 'g']
-                    # for v in variants:
-                    #     part.append(InlineKeyboardButton(text=a[variants.index(v)], callback_data='nothing'))
-                    # inline_button.append(part)
-                    # for i in var_answers:
-                    #     part = []
-                    #     for v in variants:
-                    #         text = str(int(float(i)))
-                    #         part.append(InlineKeyboardButton(text=text, callback_data='{}_{}_{}_{}'.format(q.sn, q.qn, v, text)))
-                    #     inline_button.append(part)
+               
                     for v in variants:
                         part = []
-                        part.append(InlineKeyboardButton(text=v, callback_data='nothing'))
                         for i in range(1, len(var_answers)+1):
                             part.append(InlineKeyboardButton(text=str(i), callback_data='{}_{}_{}_{}'.format(q.sn, q.qn, v, i)))  # section number _ question nummber _ variant name _ answer
+                            if len(part) == 5:
+                                inline_button.append(part)
+                                part = []
+                        add_text = '\n\n🔸   0️⃣     <b>{}</b>    🔟    🔹'.format(v)
                         inline_button.append(part)
-                else:
+                        break
+                else:  # (3, 17)
                     var_answers = []
 
                     for al in ans_list:
@@ -358,51 +357,91 @@ def inline_answering(update, context):
 
                     
                     for v in range(1, len(variants)+1):
-                        part = []
-                        part.append(InlineKeyboardButton(text=v, callback_data='nothing'))
-                        
                         for i in var_answers:
-                            part.append(InlineKeyboardButton(text=alpha[var_answers.index(i)], callback_data='{}_{}_{}_{}'.format(q.sn, q.qn, v, i)))  # section number _ question nummber _ variant name _ answer
-                        inline_button.append(part)
-                inline_button.append([InlineKeyboardButton(text=get_word('next', update), callback_data='next_question')])
+                            inline_button.append([InlineKeyboardButton(text=i, callback_data='{}_{}_{}_{}'.format(q.sn, q.qn, v, i))])  # section number _ question nummber _ variant name _ answer
+                        add_text = '\n\n💬    ⬛️◼️◾️▪️  <b>{}</b>   ▫️◽️◻️⬜️   🗯    '.format(variants[v-1])
+                        break
+                inline_button.append([InlineKeyboardButton(text=get_word('next', update), callback_data='next_question-2')])
 
 
-                add_text = '\n\n'
-                if next_q == (3, 17):
-                    for i in var_answers:
-                        add_text += '{}.{}   '.format(alpha[var_answers.index(i)], i)
-                    add_text += '\n\n'
-                    index = 1
-                    for i in variants:
-                        add_text += '\n{}.{}'.format(index, i)
-                        index += 1
-                else:  # elif 3 , 16
-                    a = ['a','b', 'c', 'd', 'e', 'f', 'g']
-                    for i in variants:
-                        add_text += '{}.{}    '.format(a[variants.index(i)], i)
-                bot.send_message(update.message.chat.id, str(q.qd)+add_text, reply_markup = InlineKeyboardMarkup(inline_button))
+                bot.send_message(update.message.chat.id, str(q.qd)+add_text, reply_markup = InlineKeyboardMarkup(inline_button), parse_mode=telegram.ParseMode.HTML)
                 # Answer.objects.create(index = l_ans.index, end=False, user = user, st = q.st, sn = q.sn, qn = q.qn, ans='')
                 return INLINE_ANSWERING
 
 
 
-
-
-
-
-
-
-
-
-
-
             else:
+
                 bot.send_message(update.message.chat.id, str(q.qd)+add_text, reply_markup=ReplyKeyboardMarkup(keyboard=get_variants_for_buttons(q.qv), resize_keyboard=True))
 
                 return CONTINUE_ANSWERING
         else:
+            if (int(current_answer.sn) == 3 and int(current_answer.qn) == 17) or (int(current_answer.sn) == 3 and int(current_answer.qn) == 16):
+                list_ans = variants_to_list(current_answer.ans)
+                v, v_a = str(current_question.qv).split('\\')
+                variants = get_variants_as_list(v)
+                var_answers = get_variants_as_list(v_a)
+                
+                ans_2_1 = Answer.objects.get(user__user_id = user.user_id, date = None, sn=2, qn = 1)
+                ans_list = variants_to_list(ans_2_1.ans)
+                
+                inline_button = []
+                if (int(current_answer.sn) == 3 and int(current_answer.qn) == 16):
+                    variants = []
+                    ans_2_1 = Answer.objects.get(user__user_id = user.user_id, date = None, sn=2, qn = 1)
+                    ans_list = variants_to_list(ans_2_1.ans)
+                    for al in ans_list:
+                        if int(ans_list[al]) != 4:
+                            variants.append(al)
+                    for v in variants:
+                        part = []
+                        if not v in list_ans:
+                            for i in range(1, len(var_answers)+1):
+                                part.append(InlineKeyboardButton(text=str(i), callback_data='{}_{}_{}_{}'.format(current_answer.sn, current_answer.qn, v, i)))  # section number _ question nummber _ variant name _ answer
+                                if len(part) == 5:
+                                    inline_button.append(part)
+                                    part = []
+                            add_text = '\n\n🔸   0️⃣     <b>{}</b>    🔟    🔹'.format(v)
+                            inline_button.append(part)
+                            
+                            break
 
-            bot.answer_callback_query(callback_query_id=update.id, text=get_word('click all', update), show_alert=True)
+
+                elif (int(current_answer.sn) == 3 and int(current_answer.qn) == 17):
+                    var_answers = []
+                    ans_2_1 = Answer.objects.get(user__user_id = user.user_id, date = None, sn=2, qn = 1)
+                    ans_list = variants_to_list(ans_2_1.ans)
+                    for al in ans_list:
+                        if int(ans_list[al]) != 4:
+                            var_answers.append(al)
+                    
+                    
+                    for v in range(1, len(variants)+1):
+                
+                        next_q_text = str(update.data)
+                        trash, next_q_n = next_q_text.split('-')
+                        if int(next_q_n) == v:
+                            for i in var_answers:
+                                inline_button.append([InlineKeyboardButton(text=i, callback_data='{}_{}_{}_{}'.format(current_question.sn, current_question.qn, v, i))])  # section number _ question nummber _ variant name _ answer
+                            add_text = '\n\n💬    ⬛️◼️◾️▪️  <b>{}</b>   ▫️◽️◻️⬜️   🗯    '.format(variants[v-1])
+                            break
+
+                    
+
+
+                try:
+                    index = int(v)
+                except:
+                    index = -1
+                inline_button.append([InlineKeyboardButton(text=get_word('next', update), callback_data='next_question-{}'.format(index+1))])
+                try:
+                    update.edit_message_text(str(current_question.qd)+add_text, reply_markup = InlineKeyboardMarkup(inline_button), parse_mode=telegram.ParseMode.HTML)
+                except:
+                    bot.answer_callback_query(callback_query_id=update.id, text=get_word('click all', update), show_alert=True)
+
+                return
+            else:
+                bot.answer_callback_query(callback_query_id=update.id, text=get_word('click all', update), show_alert=True)
             
     elif '_' in update.data:
         sn, qn , vn, ans = str(update.data).split('_')
@@ -443,56 +482,45 @@ def inline_answering(update, context):
 
         inline_button = []
 
-
-        # a = ['a','b', 'c', 'd', 'e', 'f', 'g']
-        # if (sn == 3 and qn == 16):
-        #     part = []
-        #     for v in variants:
-        #         part.append(InlineKeyboardButton(text=a[variants.index(v)], callback_data='nothing'))
-        #     inline_button.append(part)
-        #     for i in var_answers:
-        #         part = []
-        #         for v in variants:
-        #             text = str(int(float(i)))
-        #             if (text == ans and v == vn) or '{}={};'.format(v, text) in l_ans.ans:
-        #                 part.append(InlineKeyboardButton(text=text + ' 🔘', callback_data='{}_{}_{}_{}'.format(this_q.sn, this_q.qn, v, text)))
-        #             else:
-        #                 part.append(InlineKeyboardButton(text=text, callback_data='{}_{}_{}_{}'.format(this_q.sn, this_q.qn, v, text)))
-
-        #         inline_button.append(part)
-    
-
-
-        # else:
-
+        
         
         index = 1
         for v in variants:
             part = []
     
             if (sn == 3 and qn == 17):
-                part.append(InlineKeyboardButton(text=str(index), callback_data='nothing'))
-                for i in var_answers:
-                    if str(index) in list_ans:
-                        if i in list_ans[str(index)]:
-                            part.append(InlineKeyboardButton(text=alpha[var_answers.index(i)] + '🔘', callback_data='{}_{}_{}_{}'.format(this_q.sn, this_q.qn, str(index), i)))  # section number _ question nummber _ variant name _ answer
+                if str(index) == vn:
+                    for i in var_answers:
+                    
+                        if str(index) in list_ans:
+                            if i in list_ans[str(index)]:
+                                inline_button.append([InlineKeyboardButton(text=i + '🔘', callback_data='{}_{}_{}_{}'.format(this_q.sn, this_q.qn, str(index), i))])  # section number _ question nummber _ variant name _ answer
+                            else:
+                                inline_button.append([InlineKeyboardButton(text=i, callback_data='{}_{}_{}_{}'.format(this_q.sn, this_q.qn, str(index), i))])  # section number _ question nummber _ variant name _ answer
                         else:
-                            part.append(InlineKeyboardButton(text=alpha[var_answers.index(i)], callback_data='{}_{}_{}_{}'.format(this_q.sn, this_q.qn, str(index), i)))  # section number _ question nummber _ variant name _ answer
-                    else:
-                        part.append(InlineKeyboardButton(text=alpha[var_answers.index(i)], callback_data='{}_{}_{}_{}'.format(this_q.sn, this_q.qn, str(index), i)))  # section number _ question nummber _ variant name _ answer
+                            inline_button.append([InlineKeyboardButton(text=i, callback_data='{}_{}_{}_{}'.format(this_q.sn, this_q.qn, str(index), i))])  # section number _ question nummber _ variant name _ answer
+                    add_text = '\n\n💬    ⬛️◼️◾️▪️  <b>{}</b>   ▫️◽️◻️⬜️   🗯    '.format(v)                    
+                    break
+                else:
+                    index += 1
+                    continue
                 index += 1
             elif (sn == 3 and qn == 16):
-                # part.append(InlineKeyboardButton(text=v, callback_data='nothing'))
+        
                 
                 if v in vn or vn in v:
     
                     for i in range(1, len(var_answers)+1):
-                        if (str(i) == ans and v == vn) or '{}={}'.format(v, i) in l_ans.ans:
+                        if (str(i) == ans and v == vn) or '{}={};'.format(v, i) in l_ans.ans:
                             part.append(InlineKeyboardButton(text=str(i) + '🔘', callback_data='{}_{}_{}_{}'.format(this_q.sn, this_q.qn, v, i)))  # section number _ question nummber _ variant name _ answer
                         else:
                             part.append(InlineKeyboardButton(text=str(i), callback_data='{}_{}_{}_{}'.format(this_q.sn, this_q.qn, v, i)))  # section number _ question nummber _ variant name _ answer
+                        if len(part) == 5:
+                            inline_button.append(part)
+                            part = []
+
                     inline_button.append(part)
-                    break
+                    add_text = '\n\n🔸   0️⃣     <b>{}</b>    🔟    🔹'.format(v)
                 else:
                     continue
 
@@ -506,28 +534,18 @@ def inline_answering(update, context):
                         part.append(InlineKeyboardButton(text=str(i), callback_data='{}_{}_{}_{}'.format(this_q.sn, this_q.qn, v, i)))  # section number _ question nummber _ variant name _ answer
             inline_button.append(part)
             
-        inline_button.append([InlineKeyboardButton(text=get_word('next', update), callback_data='next_question')])
+        inline_button.append([InlineKeyboardButton(text=get_word('next', update), callback_data='next_question-{}'.format(index+1))])
 
-        add_text = '\n\n'
 
         index = 1
         if not (sn == 3 and qn == 16) and not (sn == 3 and qn == 17):
+            add_text = '\n\n'
             for i in var_answers:
-                add_text += '\n{}.{}'.format(index, i)
-                index += 1
-        if (sn == 3 and qn == 17):
-            for i in var_answers:
-                add_text += '{}.{}   '.format(alpha[var_answers.index(i)], i)
-            add_text += '\n\n'
-            for i in variants:
                 add_text += '\n{}.{}'.format(index, i)
                 index += 1
 
-        elif (sn == 3 and qn == 16):
-            a = ['a','b', 'c', 'd', 'e', 'f', 'g']
-            for i in variants:
-                add_text += '{}.{}    '.format(a[variants.index(i)], i)
-        update.edit_message_text(str(this_q.qd)+add_text, reply_markup = InlineKeyboardMarkup(inline_button))
+        update.edit_message_text(str(this_q.qd)+add_text, reply_markup = InlineKeyboardMarkup(inline_button), parse_mode=telegram.ParseMode.HTML)
+        
         return INLINE_ANSWERING
     else:
         return CONTINUE_ANSWERING
