@@ -467,10 +467,9 @@ def inline_answering(update, context):
 
         
         index = 1
-        print(variants)
         for v in variants:
             part = []
-            print(sn, qn)
+    
             if (sn == 3 and qn == 17):
                 part.append(InlineKeyboardButton(text=str(index), callback_data='nothing'))
                 for i in var_answers:
@@ -484,13 +483,15 @@ def inline_answering(update, context):
                 index += 1
             elif (sn == 3 and qn == 16):
                 # part.append(InlineKeyboardButton(text=v, callback_data='nothing'))
-                print(v, vn)
+                
                 if v in vn or vn in v:
+    
                     for i in range(1, len(var_answers)+1):
                         if (str(i) == ans and v == vn) or '{}={}'.format(v, i) in l_ans.ans:
                             part.append(InlineKeyboardButton(text=str(i) + '🔘', callback_data='{}_{}_{}_{}'.format(this_q.sn, this_q.qn, v, i)))  # section number _ question nummber _ variant name _ answer
                         else:
                             part.append(InlineKeyboardButton(text=str(i), callback_data='{}_{}_{}_{}'.format(this_q.sn, this_q.qn, v, i)))  # section number _ question nummber _ variant name _ answer
+                    inline_button.append(part)
                     break
                 else:
                     continue
