@@ -1,5 +1,5 @@
 lang_dict = {
-    'main menu': ['Asosiy menyu', 'Главное меню'],
+    'main menu': ['Asosiy menyu 🏠', 'Главное меню 🏠'],
     
     'take ques': ['🧾 So\'rovnomada qatnashish', '🧾 Пройти опросник'],
 

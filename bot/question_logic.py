@@ -17,9 +17,12 @@ sections_and_questions = [
 def take_question(update, context):
     user = get_user_by_id(update.message.chat.id)
     question = Question.objects.get(sn=1, qn=1, lang=user.lang)
-    print(question.qd)
-    update.message.reply_text(str(question.qd), reply_markup=ReplyKeyboardMarkup(keyboard=get_variants_for_buttons(question.qv), resize_keyboard=True))
-    a = Answer_index.objects.create(end=False, user_id=update.message.chat.id)
+    keys = get_variants_for_buttons(question.qv)
+    keys.append([get_word('main menu', update)])
+    update.message.reply_text(str(question.qd), reply_markup=ReplyKeyboardMarkup(keyboard=keys, resize_keyboard=True))
+
+    Answer_index.objects.get_or_create(end=False, user_id=update.message.chat.id)
+    a = Answer_index.objects.get(end=False, user_id=update.message.chat.id)
     Answer.objects.create(end=False, user = user, st = question.st, sn = question.sn, qn = question.qn, index = a.pk)
     return CONTINUE_ANSWERING
 
@@ -31,7 +34,10 @@ alpha = ['a','b', 'c', 'd', 'e', 'f', 'g']
 def loop_answering(update, context):
     bot = context.bot
     user = get_user_by_id(update.message.chat.id)
-    answer = update.message.text
+    try:
+        answer = update.data
+    except:
+        answer = update.message.text
     
     l_ans = Answer.objects.get(user__user_id = user.user_id, end=False)  # last answer
 
@@ -49,7 +55,18 @@ def loop_answering(update, context):
 
     next_q = sections_and_questions[sections_and_questions.index((l_ans.sn, l_ans.qn)) + 1] # next question (sn, qn)
     
-    if not answer in l_q.qv and (l_ans.sn, l_ans.qn) != (2, 3) and (l_ans.sn, l_ans.qn) != (2, 4) and (l_ans.sn, l_ans.qn) != (2, 10)and (l_ans.sn, l_ans.qn) != (3, 2)and not ((l_ans.sn, l_ans.qn) in [(1, 2), (1, 3), (3, 3), (3, 4), (3, 5), (3, 6), (3, 7), (3, 8), (3, 9), (3, 10), (3, 11), (3, 12), (3, 13), (3, 14), (3, 15), (4, 2), (4, 4) ]):
+    if answer == get_word('back', update):
+        l_ans.delete()
+        l_ans = Answer.objects.filter(user__user_id = user.user_id, date=None).order_by('-sn', '-qn')[0]
+        next_q = sections_and_questions[sections_and_questions.index((l_ans.sn, l_ans.qn))]
+        l_ans.delete()
+        try:
+            l_ans = Answer.objects.filter(user__user_id = user.user_id, date=None).order_by('-sn', '-qn')[0]
+            answer = l_ans.ans
+        except:
+            take_question(update, context)
+            return CONTINUE_ANSWERING
+    elif not answer in l_q.qv and (l_ans.sn, l_ans.qn) != (2, 3) and (l_ans.sn, l_ans.qn) != (2, 4) and (l_ans.sn, l_ans.qn) != (2, 10)and (l_ans.sn, l_ans.qn) != (3, 2)and not ((l_ans.sn, l_ans.qn) in [(1, 2), (1, 3), (3, 3), (3, 4), (3, 5), (3, 6), (3, 7), (3, 8), (3, 9), (3, 10), (3, 11), (3, 12), (3, 13), (3, 14), (3, 15), (4, 2), (4, 4) ]):
         update.message.reply_text(get_word('send again', update))
         return 
     elif (l_ans.sn, l_ans.qn) == (1, 2):
@@ -127,7 +144,7 @@ def loop_answering(update, context):
         v, v_a = str(q_3_1.qv).split('\\')
         all_variants = get_variants_as_list(v)
         for i in all_variants[l_ans.qn-1:]:
-            print(i)
+            
             if i in answers:
                 if int(answers[i]) == 3:
                     break
@@ -156,10 +173,7 @@ def loop_answering(update, context):
             
 
 
-        # this_ans = Answer.objects.get(user__user_id = user.user_id, date=None, sn=2, qn=3)
-        # this_ques = Question.objects.get(sn=2, qn=3, lang=user.lang)
-        # if not this_ans.ans in get_variants_as_list(this_ques.qv)[:-2]: # спросить тех кто не выбрал код 6 в Q2e 
-        #     next_q = sections_and_questions[sections_and_questions.index((2, 9))] # next question (sn, qn)
+
     
     l_ans.ans = answer
     l_ans.end = True
@@ -178,8 +192,8 @@ def loop_answering(update, context):
         add_text = ''
 
     if next_q == (1, 2):
-        update.message.reply_text(str(q.qd) + '  (мм.гггг)', reply_markup=ReplyKeyboardRemove(remove_keyboard=True))
-    elif next_q == (2, 1) or next_q == (3, 1) or next_q == (3, 16):
+        update.message.reply_text(str(q.qd) + '  (мм.гггг)', reply_markup=ReplyKeyboardMarkup(keyboard=[[get_word('back', update)], [get_word('main menu', update)]], resize_keyboard=True))
+    elif next_q == (2, 1) or next_q == (3, 1) or next_q == (3, 16) or next_q == (3, 17):
         v, v_a = str(q.qv).split('\\')
         variants = get_variants_as_list(v)
         var_answers = get_variants_as_list(v_a)
@@ -193,28 +207,26 @@ def loop_answering(update, context):
             if variants == []:
                 next_q = (4, 1)
                 q = Question.objects.get(sn = next_q[0], qn = next_q[1], lang=user.lang) # Question
-                update.message.reply_text(str(q.qd)+add_text, reply_markup=ReplyKeyboardMarkup(keyboard=get_variants_for_buttons(q.qv), resize_keyboard=True))
+                keys = get_variants_for_buttons(q.qv)
+                keys.append([get_word('back', update)])
+                keys.append([get_word('main menu', update)])
+                update.message.reply_text(str(q.qd)+add_text, reply_markup=ReplyKeyboardMarkup(keyboard=keys, resize_keyboard=True))
                 Answer.objects.create(index = l_ans.index, end=False, user = user, st = q.st, sn = q.sn, qn = q.qn, ans='')
                 return CONTINUE_ANSWERING
+        elif next_q == (3, 17):
+            var_answers = []
+            ans_2_1 = Answer.objects.get(user__user_id = user.user_id, date = None, sn=2, qn = 1)
+            ans_list = variants_to_list(ans_2_1.ans)
+            for al in ans_list:
+                if int(ans_list[al]) != 4:
+                    var_answers.append(al)
+                         
         inline_button = []
-        # if next_q == (3, 16):
-            
-        #     part = []
-        #     a = ['a','b', 'c', 'd', 'e', 'f', 'g']
-        #     for v in variants:
-        #         part.append(InlineKeyboardButton(text=a[variants.index(v)], callback_data='nothing'))
-        #     inline_button.append(part)
-        #     for i in var_answers:
-        #         part = []
-        #         for v in variants:
-        #             text = str(int(float(i)))
-        #             part.append(InlineKeyboardButton(text=text, callback_data='{}_{}_{}_{}'.format(q.sn, q.qn, v, text)))
-        #         inline_button.append(part)
 
-        # else:
         if next_q == (3, 16):
             for v in variants:
                 part = []
+                
                 # part.append(InlineKeyboardButton(text=v, callback_data='nothing'))
                 for i in range(1, len(var_answers)+1):
                     part.append(InlineKeyboardButton(text=str(i), callback_data='{}_{}_{}_{}'.format(q.sn, q.qn, v, i)))  # section number _ question nummber _ variant name _ answer
@@ -225,6 +237,14 @@ def loop_answering(update, context):
                 add_text = '\n\n🔸   0️⃣    <b>{}</b>    🔟    🔹'.format(v)
                 break
 
+        
+        elif next_q == (3, 17):
+            for v in range(1, len(variants)+1):
+                for i in var_answers:
+                    inline_button.append([InlineKeyboardButton(text=i, callback_data='{}_{}_{}_{}'.format(q.sn, q.qn, v, i))])  # section number _ question nummber _ variant name _ answer
+                add_text = '\n\n💬    ⬛️◼️◾️▪️  <b>{}</b>   ▫️◽️◻️⬜️   🗯    '.format(variants[v-1])
+                break
+
 
         else:
             for v in variants:
@@ -233,13 +253,14 @@ def loop_answering(update, context):
                 for i in range(1, len(var_answers)+1):
                     part.append(InlineKeyboardButton(text=str(i), callback_data='{}_{}_{}_{}'.format(q.sn, q.qn, v, i)))  # section number _ question nummber _ variant name _ answer
                 inline_button.append(part)
-        inline_button.append([InlineKeyboardButton(text=get_word('next', update), callback_data='next_question')])
+        inline_button.append([InlineKeyboardButton(text=get_word('back', update), callback_data='prev_question-0'), InlineKeyboardButton(text=get_word('next', update), callback_data='next_question-2')])
+        inline_button.append([InlineKeyboardButton(text=get_word('main menu', update), callback_data='main_menu')])
         del_msg = update.message.reply_text(str(q.qd), reply_markup=ReplyKeyboardRemove(remove_keyboard=True))
         bot.delete_message(update.message.chat.id, del_msg.message_id)
 
 
         index = 1
-        if next_q != (3, 16):
+        if next_q != (3, 16) and next_q != (3, 17):
             add_text = '\n\n'
             for i in var_answers:
                 add_text += '\n{}.{}'.format(index, i)
@@ -253,10 +274,15 @@ def loop_answering(update, context):
         keys = get_variants_for_buttons(q.qv)
         keys.insert(-1, [get_word('city_chirchik', update)])
         keys.insert(-1, [get_word('city_gulistan', update)])
+        keys.append([get_word('back', update)])
+        keys.append([get_word('main menu', update)])
         update.message.reply_text(str(q.qd)+add_text, reply_markup=ReplyKeyboardMarkup(keyboard=keys, resize_keyboard=True))
     
     else:
-        update.message.reply_text(str(q.qd)+add_text, reply_markup=ReplyKeyboardMarkup(keyboard=get_variants_for_buttons(q.qv), resize_keyboard=True))
+        keys = get_variants_for_buttons(q.qv)
+        keys.append([get_word('back', update)])
+        keys.append([get_word('main menu', update)])
+        update.message.reply_text(str(q.qd)+add_text, reply_markup=ReplyKeyboardMarkup(keyboard=keys, resize_keyboard=True))
     
     Answer.objects.create(index = l_ans.index, end=False, user = user, st = q.st, sn = q.sn, qn = q.qn, ans='')
     return CONTINUE_ANSWERING
@@ -266,8 +292,9 @@ def inline_answering(update, context):
     bot = context.bot
 
     update = update.callback_query
+    
     user = get_user_by_id(update.message.chat.id)
-    if 'next_question' in update.data:
+    if '_question' in update.data:
         current_answer = Answer.objects.get(user__user_id = user.user_id, end=False)
         current_question = Question.objects.get(sn = current_answer.sn, qn = current_answer.qn, lang=user.lang)
         answers = variants_to_list(current_answer.ans)
@@ -282,13 +309,21 @@ def inline_answering(update, context):
                     variants.append(al)
             required_answers = variants
         if '-' in str(update.data):
+            
             sth_text, index_of_ = str(update.data).split('-')
         else:
             index_of_ = '0'
-        if len(answers) == len(required_answers) or ((int(current_answer.sn) == 3 and int(current_answer.qn) == 17  and 7 <= int(index_of_))):
+        if len(answers) == len(required_answers) or ((int(current_answer.sn) == 3 and int(current_answer.qn) == 17  and 9 <= int(index_of_))) or ('prev' in update.data and not (int(current_answer.sn) == 3 and int(current_answer.qn) == 17) and not (int(current_answer.sn) == 3 and int(current_answer.qn) == 16) ):
             current_answer.end = True
             current_answer.save()
             bot.delete_message(update.message.chat.id, update.message.message_id)
+            if 'prev' in update.data:
+                current_answer.delete()
+                current_answer = Answer.objects.filter(user__user_id = user.user_id, date=None).order_by('-sn', '-qn')[0]
+                current_answer.delete()
+                current_answer = Answer.objects.filter(user__user_id = user.user_id, date=None).order_by('-sn', '-qn')[0]
+
+            
             next_q = sections_and_questions[sections_and_questions.index((current_answer.sn, current_answer.qn)) + 1] # next question (sn, qn)
             all_variants = get_variants_as_list(v)
             if int(current_answer.sn) == 3 and int(current_answer.qn) == 1:
@@ -361,8 +396,8 @@ def inline_answering(update, context):
                             inline_button.append([InlineKeyboardButton(text=i, callback_data='{}_{}_{}_{}'.format(q.sn, q.qn, v, i))])  # section number _ question nummber _ variant name _ answer
                         add_text = '\n\n💬    ⬛️◼️◾️▪️  <b>{}</b>   ▫️◽️◻️⬜️   🗯    '.format(variants[v-1])
                         break
-                inline_button.append([InlineKeyboardButton(text=get_word('next', update), callback_data='next_question-2')])
-
+                inline_button.append([InlineKeyboardButton(text=get_word('back', update), callback_data='prev_question-0'), InlineKeyboardButton(text=get_word('next', update), callback_data='next_question-2')])
+                inline_button.append([InlineKeyboardButton(text=get_word('main menu', update), callback_data='main_menu')])
 
                 bot.send_message(update.message.chat.id, str(q.qd)+add_text, reply_markup = InlineKeyboardMarkup(inline_button), parse_mode=telegram.ParseMode.HTML)
                 # Answer.objects.create(index = l_ans.index, end=False, user = user, st = q.st, sn = q.sn, qn = q.qn, ans='')
@@ -371,13 +406,16 @@ def inline_answering(update, context):
 
 
             else:
-
-                bot.send_message(update.message.chat.id, str(q.qd)+add_text, reply_markup=ReplyKeyboardMarkup(keyboard=get_variants_for_buttons(q.qv), resize_keyboard=True))
+                keys = get_variants_for_buttons(q.qv)
+                keys.append([get_word('back', update)])
+                keys.append([get_word('main menu', update)])
+                bot.send_message(update.message.chat.id, str(q.qd)+add_text, reply_markup=ReplyKeyboardMarkup(keyboard=keys, resize_keyboard=True))
 
                 return CONTINUE_ANSWERING
         else:
             if (int(current_answer.sn) == 3 and int(current_answer.qn) == 17) or (int(current_answer.sn) == 3 and int(current_answer.qn) == 16):
                 list_ans = variants_to_list(current_answer.ans)
+
                 v, v_a = str(current_question.qv).split('\\')
                 variants = get_variants_as_list(v)
                 var_answers = get_variants_as_list(v_a)
@@ -386,7 +424,39 @@ def inline_answering(update, context):
                 ans_list = variants_to_list(ans_2_1.ans)
                 
                 inline_button = []
-                if (int(current_answer.sn) == 3 and int(current_answer.qn) == 16):
+
+
+
+                if (int(current_answer.sn) == 3 and int(current_answer.qn) == 16) and 'prev' in update.data and '-0' in update.data:
+                    current_answer.delete()
+                    
+                    
+                    
+                    current_answer = Answer.objects.filter(user__user_id = user.user_id, date=None).order_by('-sn', '-qn')[0]
+                    current_answer.delete()
+                    
+                    current_answer = Answer.objects.filter(user__user_id = user.user_id, date=None).order_by('-sn', '-qn')[0]
+                    current_answer.end = False
+                    new_data = current_answer.ans
+                    current_answer.ans = ""
+                    current_answer.save()
+                    update.data = new_data
+                    bot.delete_message(update.message.chat.id, update.message.message_id)
+                    loop_answering(update, context)
+                    if current_answer.sn == 2:
+                        return INLINE_ANSWERING
+                    else:
+                        return CONTINUE_ANSWERING
+                    
+                elif (int(current_answer.sn) == 3 and int(current_answer.qn) == 16) or ((int(current_answer.sn) == 3 and int(current_answer.qn) == 17) and 'prev' in update.data and '-0' in update.data):
+                    if (int(current_answer.sn) == 3 and int(current_answer.qn) == 17):
+                        current_answer.delete()
+                        current_answer = Answer.objects.get(user__user_id = user.user_id, sn = 3, qn = 16, date=None)
+                        current_answer.end = False
+                        current_answer.ans = ""
+                        current_answer.save()
+                        current_question = Question.objects.get(sn = current_answer.sn, qn = current_answer.qn, lang=user.lang)
+
                     variants = []
                     ans_2_1 = Answer.objects.get(user__user_id = user.user_id, date = None, sn=2, qn = 1)
                     ans_list = variants_to_list(ans_2_1.ans)
@@ -394,10 +464,23 @@ def inline_answering(update, context):
                         if int(ans_list[al]) != 4:
                             variants.append(al)
                     for v in variants:
+                        prev_next_qn = variants.index(v) + 1
                         part = []
-                        if not v in list_ans:
+                        next_q_text = str(update.data)
+                        trash, next_q_n = next_q_text.split('-')
+                        if next_q_n == '0':
+                            next_q_n = '1'
+                            var_answers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+                            
+                        if int(next_q_n) == variants.index(v)+1:
+                            # if list_ans == []:
+                            #     bot.answer_callback_query(callback_query_id=update.id, text=get_word('click all', update), show_alert=True)
+                            #     return                            
                             for i in range(1, len(var_answers)+1):
-                                part.append(InlineKeyboardButton(text=str(i), callback_data='{}_{}_{}_{}'.format(current_answer.sn, current_answer.qn, v, i)))  # section number _ question nummber _ variant name _ answer
+                                if '{}={};'.format(v, i) in current_answer.ans:
+                                    part.append(InlineKeyboardButton(text=str(i) + '🔘', callback_data='{}_{}_{}_{}'.format(current_answer.sn, current_answer.qn, v, i)))  # section number _ question nummber _ variant name _ answer
+                                else:    
+                                    part.append(InlineKeyboardButton(text=str(i), callback_data='{}_{}_{}_{}'.format(current_answer.sn, current_answer.qn, v, i)))  # section number _ question nummber _ variant name _ answer
                                 if len(part) == 5:
                                     inline_button.append(part)
                                     part = []
@@ -422,7 +505,14 @@ def inline_answering(update, context):
                         trash, next_q_n = next_q_text.split('-')
                         if int(next_q_n) == v:
                             for i in var_answers:
-                                inline_button.append([InlineKeyboardButton(text=i, callback_data='{}_{}_{}_{}'.format(current_question.sn, current_question.qn, v, i))])  # section number _ question nummber _ variant name _ answer
+                                if str(v) in list_ans:
+                                    if i in list_ans[str(v)]:
+                                        inline_button.append([InlineKeyboardButton(text=i + '🔘', callback_data='{}_{}_{}_{}'.format(current_question.sn, current_question.qn, v, i))])
+                                    else:
+                                        inline_button.append([InlineKeyboardButton(text=i, callback_data='{}_{}_{}_{}'.format(current_question.sn, current_question.qn, v, i))])  # section number _ question nummber _ variant name _ answer
+                                else:
+                                    inline_button.append([InlineKeyboardButton(text=i, callback_data='{}_{}_{}_{}'.format(current_question.sn, current_question.qn, v, i))])  # section number _ question nummber _ variant name _ answer
+                            
                             add_text = '\n\n💬    ⬛️◼️◾️▪️  <b>{}</b>   ▫️◽️◻️⬜️   🗯    '.format(variants[v-1])
                             break
 
@@ -432,11 +522,13 @@ def inline_answering(update, context):
                 try:
                     index = int(v)
                 except:
-                    index = -1
-                inline_button.append([InlineKeyboardButton(text=get_word('next', update), callback_data='next_question-{}'.format(index+1))])
+                    index = prev_next_qn
+                inline_button.append([InlineKeyboardButton(text=get_word('back', update), callback_data='prev_question-{}'.format(index-1)), InlineKeyboardButton(text=get_word('next', update), callback_data='next_question-{}'.format(index+1))])
+                inline_button.append([InlineKeyboardButton(text=get_word('main menu', update), callback_data='main_menu')])
                 try:
                     update.edit_message_text(str(current_question.qd)+add_text, reply_markup = InlineKeyboardMarkup(inline_button), parse_mode=telegram.ParseMode.HTML)
                 except:
+                    
                     bot.answer_callback_query(callback_query_id=update.id, text=get_word('click all', update), show_alert=True)
 
                 return
@@ -447,6 +539,7 @@ def inline_answering(update, context):
         sn, qn , vn, ans = str(update.data).split('_')
         sn = int(sn)
         qn = int(qn)
+        
         l_ans = Answer.objects.get(user__user_id = user.user_id, end=False, qn = qn, sn = sn)  # last answer
         this_q = Question.objects.get(sn = sn, qn = qn, lang=user.lang)  # this question
         list_ans = variants_to_list(l_ans.ans) # list of current answers 
@@ -506,7 +599,7 @@ def inline_answering(update, context):
                     continue
                 index += 1
             elif (sn == 3 and qn == 16):
-        
+                
                 
                 if v in vn or vn in v:
     
@@ -521,6 +614,7 @@ def inline_answering(update, context):
 
                     inline_button.append(part)
                     add_text = '\n\n🔸   0️⃣     <b>{}</b>    🔟    🔹'.format(v)
+                    index = variants.index(v) + 1
                 else:
                     continue
 
@@ -533,9 +627,9 @@ def inline_answering(update, context):
                     else:
                         part.append(InlineKeyboardButton(text=str(i), callback_data='{}_{}_{}_{}'.format(this_q.sn, this_q.qn, v, i)))  # section number _ question nummber _ variant name _ answer
             inline_button.append(part)
-            
-        inline_button.append([InlineKeyboardButton(text=get_word('next', update), callback_data='next_question-{}'.format(index+1))])
-
+        
+        inline_button.append([InlineKeyboardButton(text=get_word('back', update), callback_data='prev_question-{}'.format(index-1)), InlineKeyboardButton(text=get_word('next', update), callback_data='next_question-{}'.format(index+1))])
+        inline_button.append([InlineKeyboardButton(text=get_word('main menu', update), callback_data='main_menu')])
 
         index = 1
         if not (sn == 3 and qn == 16) and not (sn == 3 and qn == 17):

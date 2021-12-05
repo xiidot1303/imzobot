@@ -52,13 +52,16 @@ def get_variants_as_text(l):
 
 def is_start(func):
     def func_arguments(*args, **kwargs):
+        bot = args[1].bot
         try:
             lalal = args[0].message.text
             update = args[0]
+            data = ''
         except:
-           update = args[0].callback_query  
+           update = args[0].callback_query
+           data = update.data  
         id = update.message.chat.id
-        if update.message.text == '/start':
+        if update.message.text == '/start' or data == 'main_menu' or update.message.text == get_word('main menu', update):
             try:
                 a_index = Answer_index.objects.get(end=False, user_id = id)
                 a_index.delete()
@@ -66,6 +69,8 @@ def is_start(func):
                     a.delete()
             except:
                 csf = 0
+            if data == 'main_menu':
+                bot.delete_message(id, update.message.message_id)
             main_menu(args[0], args[1])
             return ConversationHandler.END
         else:
