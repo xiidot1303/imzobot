@@ -316,13 +316,14 @@ def inline_answering(update, context):
         if len(answers) == len(required_answers) or ((int(current_answer.sn) == 3 and int(current_answer.qn) == 17  and 9 <= int(index_of_))) or ('prev' in update.data and not (int(current_answer.sn) == 3 and int(current_answer.qn) == 17) and not (int(current_answer.sn) == 3 and int(current_answer.qn) == 16) ):
             current_answer.end = True
             current_answer.save()
-            bot.delete_message(update.message.chat.id, update.message.message_id)
             if 'prev' in update.data:
                 current_answer.delete()
                 current_answer = Answer.objects.filter(user__user_id = user.user_id, date=None).order_by('-sn', '-qn')[0]
                 current_answer.delete()
                 current_answer = Answer.objects.filter(user__user_id = user.user_id, date=None).order_by('-sn', '-qn')[0]
-
+                bot.delete_message(update.message.chat.id, update.message.message_id)
+            else:
+                update.edit_message_text(text_after_inline(current_question, current_answer), parse_mode=telegram.ParseMode.HTML)
             
             next_q = sections_and_questions[sections_and_questions.index((current_answer.sn, current_answer.qn)) + 1] # next question (sn, qn)
             all_variants = get_variants_as_list(v)

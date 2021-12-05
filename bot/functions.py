@@ -104,3 +104,22 @@ def stop_answering(id):
     for a in Answer.objects.filter(user__user_id = id, date=None):
         a.date = date.today()   
         a.save()
+
+
+
+def text_after_inline(question, answer):
+    ans_list = variants_to_list(answer.ans)
+    v, v_a = str(question.qv).split('\\')
+    variants = get_variants_as_list(v)
+    var_answers = get_variants_as_list(v_a)
+    r_text = question.qd + '\n\n'
+    
+    for i in ans_list:
+        if answer.sn == 3 and answer.qn == 17:
+            
+            line = '<b>{}</b>:  <i>{}</i>'.format(variants[int(i) - 1], ans_list[i])
+        else:
+            line = '<b>{}</b>:  <i>{}</i>'.format(i, var_answers[int(ans_list[i]) - 1])
+        r_text += line + '\n'
+
+    return r_text
