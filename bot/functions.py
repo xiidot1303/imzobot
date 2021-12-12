@@ -82,7 +82,7 @@ def is_start(func):
                     a.delete()
             except:
                 csf = 0
-            if data == 'main_menu':
+            if data == 'main_menu' or update.message.text == '/start':
                 bot.delete_message(id, update.message.message_id)
             main_menu(args[0], args[1])
             return ConversationHandler.END
