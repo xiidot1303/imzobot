@@ -54,7 +54,7 @@ def loop_answering(update, context):
     
 
     next_q = sections_and_questions[sections_and_questions.index((l_ans.sn, l_ans.qn)) + 1] # next question (sn, qn)
-    
+    is_end = True
     if answer == get_word('back', update):
         l_ans.delete()
         l_ans = Answer.objects.filter(user__user_id = user.user_id, date=None).order_by('-sn', '-qn')[0]
@@ -137,46 +137,88 @@ def loop_answering(update, context):
 
 
     elif (l_ans.sn, l_ans.qn) in [(3, 2), (3, 3), (3, 4), (3, 5), (3, 6), (3, 7)]:
-        q_3_1 = Question.objects.get(lang=user.lang, sn=3, qn=1)
-        a_3_1 = Answer.objects.get(date=None, user__user_id=user.user_id, sn = 3, qn = 1)
-        answers = variants_to_list(a_3_1.ans)
+        if answer == get_word('next', update):
+            q_3_1 = Question.objects.get(lang=user.lang, sn=3, qn=1)
+            a_3_1 = Answer.objects.get(date=None, user__user_id=user.user_id, sn = 3, qn = 1)
+            answers = variants_to_list(a_3_1.ans)
 
-        v, v_a = str(q_3_1.qv).split('\\')
-        all_variants = get_variants_as_list(v)
-        for i in all_variants[l_ans.qn-1:]:
-            
-            if i in answers:
-                if int(answers[i]) == 3:
-                    break
-            next_q = (next_q[0], next_q[1] + 1)
+            v, v_a = str(q_3_1.qv).split('\\')
+            all_variants = get_variants_as_list(v)
+            for i in all_variants[l_ans.qn-1:]:
+
+                if i in answers:
+                    if int(answers[i]) == 3:
+                        break
+                next_q = (next_q[0], next_q[1] + 1)
+            else:
+                for i in all_variants:
+                    if i in answers:
+                        if int(answers[i]) == 1:
+                            break
+                    next_q = (next_q[0], next_q[1] + 1)
         else:
-            for i in all_variants:
+            next_q = (l_ans.sn, l_ans.qn)
+            if '✅' in answer:
+                last_answers = get_answers_as_list(l_ans.ans)
+                last_answers.remove(answer[2:])
+                new_ans = get_answers_as_text(last_answers)
+
+            else:
+                new_ans = l_ans.ans + answer + ';'
+
+            l_ans.ans = new_ans
+            l_ans.save()
+            is_end = False
+        answer = l_ans.ans
+
+    elif (l_ans.sn, l_ans.qn) in [(3, 8), (3, 9), (3, 10), (3, 11), (3, 12), (3, 13), (3, 14)]:
+        if answer == get_word('next', update):
+            q_3_1 = Question.objects.get(lang=user.lang, sn=3, qn=1)
+            a_3_1 = Answer.objects.get(date=None, user__user_id=user.user_id, sn = 3, qn = 1)
+            answers = variants_to_list(a_3_1.ans)
+
+            v, v_a = str(q_3_1.qv).split('\\')
+            all_variants = get_variants_as_list(v)
+            for i in all_variants[l_ans.qn-1-7:]:
                 if i in answers:
                     if int(answers[i]) == 1:
                         break
                 next_q = (next_q[0], next_q[1] + 1)
+        else:
+            next_q = (l_ans.sn, l_ans.qn)
 
+            if '✅' in answer:
+                last_answers = get_answers_as_list(l_ans.ans)
+                last_answers.remove(answer[2:])
+                new_ans = get_answers_as_text(last_answers)
+                
+            else:
+                new_ans = l_ans.ans + answer + ';'
+            l_ans.ans = new_ans
+            l_ans.save()
+            is_end = False
+        answer = l_ans.ans
 
-    elif (l_ans.sn, l_ans.qn) in [(3, 8), (3, 9), (3, 10), (3, 11), (3, 12), (3, 13), (3, 14)]:
-        q_3_1 = Question.objects.get(lang=user.lang, sn=3, qn=1)
-        a_3_1 = Answer.objects.get(date=None, user__user_id=user.user_id, sn = 3, qn = 1)
-        answers = variants_to_list(a_3_1.ans)
+    elif (l_ans.sn, l_ans.qn) in [(4, 2), (4, 4)]:
+        if answer != get_word('next', update):
+            next_q = (l_ans.sn, l_ans.qn)
 
-        v, v_a = str(q_3_1.qv).split('\\')
-        all_variants = get_variants_as_list(v)
-        for i in all_variants[l_ans.qn-1-7:]:
-            if i in answers:
-                if int(answers[i]) == 1:
-                    break
-            next_q = (next_q[0], next_q[1] + 1)
-
-            
-
-
+            if '✅' in answer:
+                last_answers = get_answers_as_list(l_ans.ans)
+                last_answers.remove(answer[2:])
+                new_ans = get_answers_as_text(last_answers)
+                
+            else:
+                new_ans = l_ans.ans + answer + ';'
+            l_ans.ans = new_ans
+            l_ans.save()
+            is_end = False
+        answer = l_ans.ans
 
     
     l_ans.ans = answer
-    l_ans.end = True
+    if is_end:
+        l_ans.end = True
     l_ans.save()
     
     q = Question.objects.get(sn = next_q[0], qn = next_q[1], lang=user.lang) # Question
@@ -278,13 +320,36 @@ def loop_answering(update, context):
         keys.append([get_word('main menu', update)])
         update.message.reply_text(str(q.qd)+add_text, reply_markup=ReplyKeyboardMarkup(keyboard=keys, resize_keyboard=True))
     
+
+    elif not is_end:
+        keys = []
+        current_answers = get_answers_as_list(l_ans.ans)
+        for i in get_variants_as_list(q.qv):
+            if i in l_ans.ans:
+                keys.append(['✅ {}'.format(i)])
+            else:
+                keys.append([i])
+        
+        for i in current_answers:
+            if not i in q.qv:
+                keys.append(['✅ {}'.format(i)])
+        keys.append([get_word('back', update), get_word('next', update)])
+        keys.append([get_word('main menu', update)])
+        bot.delete_message(update.message.chat.id, update.message.message_id)
+        bot.delete_message(update.message.chat.id, update.message.message_id-1)
+
+        add_text += '\n\n\n<b>{}</b>\n'.format(get_word('your answers', update))
+        for i in current_answers:
+            add_text += '✅ <i>{}</i>;\n'.format(i)
+        bot.send_message(update.message.chat.id, str(q.qd)+add_text, reply_markup=ReplyKeyboardMarkup(keyboard=keys, resize_keyboard=True), parse_mode=telegram.ParseMode.HTML)  
+
     else:
         keys = get_variants_for_buttons(q.qv)
         keys.append([get_word('back', update)])
         keys.append([get_word('main menu', update)])
         update.message.reply_text(str(q.qd)+add_text, reply_markup=ReplyKeyboardMarkup(keyboard=keys, resize_keyboard=True))
-    
-    Answer.objects.create(index = l_ans.index, end=False, user = user, st = q.st, sn = q.sn, qn = q.qn, ans='')
+    if is_end:
+        Answer.objects.create(index = l_ans.index, end=False, user = user, st = q.st, sn = q.sn, qn = q.qn, ans='')
     return CONTINUE_ANSWERING
 
 @is_start

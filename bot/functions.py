@@ -49,6 +49,19 @@ def get_variants_as_text(l):
         text_ += i+'||'
     return text_
 
+def get_answers_as_list(text):
+    list_ = list(str(text).split(';'))
+    list_.remove('')
+    return list_
+
+def get_answers_as_text(l):
+    text_ = ''
+    for i in l:
+        text_ += i+';'
+    return text_
+
+
+
 
 def is_start(func):
     def func_arguments(*args, **kwargs):
