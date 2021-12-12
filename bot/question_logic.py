@@ -707,6 +707,9 @@ def inline_answering(update, context):
         update.edit_message_text(str(this_q.qd)+add_text, reply_markup = InlineKeyboardMarkup(inline_button), parse_mode=telegram.ParseMode.HTML)
         
         return INLINE_ANSWERING
+    elif 'nothing' in update.data:
+        return
+    
     else:
         return CONTINUE_ANSWERING
         
