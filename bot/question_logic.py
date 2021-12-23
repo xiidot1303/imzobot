@@ -197,7 +197,7 @@ def loop_answering(update, context):
         v, v_a = str(q.qv).split('\\')
         variants = get_variants_as_list(v)
         var_answers = get_variants_as_list(v_a)
-        if next_q == (3, 1) or next_q == (3, 16):
+        if next_q == (3, 1) or next_q == (3, 16) or next_q == (3, 16):
             variants = []
             ans_2_1 = Answer.objects.get(user__user_id = user.user_id, date = None, sn=2, qn = 1)
             ans_list = variants_to_list(ans_2_1.ans)
@@ -213,13 +213,13 @@ def loop_answering(update, context):
                 update.message.reply_text(str(q.qd)+add_text, reply_markup=ReplyKeyboardMarkup(keyboard=keys, resize_keyboard=True))
                 Answer.objects.create(index = l_ans.index, end=False, user = user, st = q.st, sn = q.sn, qn = q.qn, ans='')
                 return CONTINUE_ANSWERING
-        elif next_q == (3, 17):
-            var_answers = []
-            ans_2_1 = Answer.objects.get(user__user_id = user.user_id, date = None, sn=2, qn = 1)
-            ans_list = variants_to_list(ans_2_1.ans)
-            for al in ans_list:
-                if int(ans_list[al]) != 4:
-                    var_answers.append(al)
+        # elif next_q == (3, 17):
+        #     var_answers = []
+        #     ans_2_1 = Answer.objects.get(user__user_id = user.user_id, date = None, sn=2, qn = 1)
+        #     ans_list = variants_to_list(ans_2_1.ans)
+        #     for al in ans_list:
+        #         if int(ans_list[al]) != 4:
+        #             var_answers.append(al)
                          
         inline_button = []
 
@@ -300,7 +300,7 @@ def inline_answering(update, context):
         answers = variants_to_list(current_answer.ans)
         v, v_a = str(current_question.qv).split('\\')
         required_answers = get_variants_as_list(v)
-        if (int(current_answer.sn) == 3 and int(current_answer.qn) == 1) or (int(current_answer.sn) == 3 and int(current_answer.qn) == 16):
+        if (int(current_answer.sn) == 3 and int(current_answer.qn) == 1) or (int(current_answer.sn) == 3 and int(current_answer.qn) == 16) or (int(current_answer.sn) == 3 and int(current_answer.qn) == 17):
             variants = []
             ans_2_1 = Answer.objects.get(user__user_id = user.user_id, date = None, sn=2, qn = 1)
             ans_list = variants_to_list(ans_2_1.ans)
@@ -313,7 +313,7 @@ def inline_answering(update, context):
             sth_text, index_of_ = str(update.data).split('-')
         else:
             index_of_ = '0'
-        if len(answers) == len(required_answers) or ((int(current_answer.sn) == 3 and int(current_answer.qn) == 17  and 9 <= int(index_of_))) or ('prev' in update.data and not (int(current_answer.sn) == 3 and int(current_answer.qn) == 17) and not (int(current_answer.sn) == 3 and int(current_answer.qn) == 16) ):
+        if len(answers) == len(required_answers) or ((int(current_answer.sn) == 3 and int(current_answer.qn) == 17  and len(required_answers)+1 <= int(index_of_))) or ('prev' in update.data and not (int(current_answer.sn) == 3 and int(current_answer.qn) == 17) and not (int(current_answer.sn) == 3 and int(current_answer.qn) == 16) ):
             current_answer.end = True
             current_answer.save()
             if 'prev' in update.data:
@@ -385,11 +385,11 @@ def inline_answering(update, context):
                         inline_button.append(part)
                         break
                 else:  # (3, 17)
-                    var_answers = []
+                    variants = []
 
                     for al in ans_list:
                         if int(ans_list[al]) != 4:
-                            var_answers.append(al)
+                            variants.append(al)
 
                     
                     for v in range(1, len(variants)+1):
@@ -492,12 +492,12 @@ def inline_answering(update, context):
 
 
                 elif (int(current_answer.sn) == 3 and int(current_answer.qn) == 17):
-                    var_answers = []
+                    variants = []
                     ans_2_1 = Answer.objects.get(user__user_id = user.user_id, date = None, sn=2, qn = 1)
                     ans_list = variants_to_list(ans_2_1.ans)
                     for al in ans_list:
                         if int(ans_list[al]) != 4:
-                            var_answers.append(al)
+                            variants.append(al)
                     
                     
                     for v in range(1, len(variants)+1):
@@ -559,20 +559,21 @@ def inline_answering(update, context):
         v, v_a = str(this_q.qv).split('\\')
         variants = get_variants_as_list(v)
         var_answers = get_variants_as_list(v_a)
-        if (sn == 3 and qn == 1) or (sn == 3 and qn == 16):
+
+        if (sn == 3 and qn == 1) or (sn == 3 and qn == 16) or (sn == 3 and qn == 17):
             variants = []
             ans_2_1 = Answer.objects.get(user__user_id = user.user_id, date = None, sn=2, qn = 1)
             ans_list = variants_to_list(ans_2_1.ans)
             for al in ans_list:
                 if int(ans_list[al]) != 4:
                     variants.append(al)
-        elif (sn == 3 and qn == 17):
-            var_answers = []
-            ans_2_1 = Answer.objects.get(user__user_id = user.user_id, date = None, sn=2, qn = 1)
-            ans_list = variants_to_list(ans_2_1.ans)
-            for al in ans_list:
-                if int(ans_list[al]) != 4:
-                    var_answers.append(al)
+        # elif (sn == 3 and qn == 17):
+        #     var_answers = []
+        #     ans_2_1 = Answer.objects.get(user__user_id = user.user_id, date = None, sn=2, qn = 1)
+        #     ans_list = variants_to_list(ans_2_1.ans)
+        #     for al in ans_list:
+        #         if int(ans_list[al]) != 4:
+        #             var_answers.append(al)
 
         inline_button = []
 

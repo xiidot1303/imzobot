@@ -94,7 +94,7 @@ def upload_file(request):
 
             Question.objects.create(lang=lang, sn = 3, st = 'Восприятия бренда', qn = 16, qd = col3[369].value, qv = '{}\\{}'.format(list_to_text(col3[371:378]), list_to_text(sh.row(370)[4:14])))
 
-            Question.objects.create(lang=lang, sn = 3, st = 'Восприятия бренда', qn = 17, qd = col3[379].value, qv = '{}\\{}'.format(list_to_text(col3[382:390]), list_to_text(sh.row(381)[4:11])))
+            Question.objects.create(lang=lang, sn = 3, st = 'Восприятия бренда', qn = 17, qd = col3[379].value, qv = '{}\\{}'.format(list_to_text(col3[382:389]), list_to_text(sh.row(381)[4:12])))
 
             Question.objects.create(lang=lang, sn = 4, st = 'Отличия в продукции', qn = 1, qd = col3[393].value, qv = list_to_text(col3[395:397]))
 

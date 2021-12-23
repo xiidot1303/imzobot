@@ -34,6 +34,12 @@ def table_multi(pk):
 
     ans_list = variants_to_list(a.ans)
     q_v = get_variants_as_list(v)
+    q_v = []
+    ans_2_1 = Answer.objects.get(user__user_id = a.user.user_id, index = a.index, sn=2, qn = 1)
+    ans_l = variants_to_list(ans_2_1.ans)
+    for al in ans_l:
+        if int(ans_l[al]) != 4:
+            q_v.append(al)
     td_list = []
     for a in ans_list:
         n = 0   
