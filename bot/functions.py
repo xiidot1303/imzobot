@@ -49,6 +49,19 @@ def get_variants_as_text(l):
         text_ += i+'||'
     return text_
 
+def get_answers_as_list(text):
+    list_ = list(str(text).split(';'))
+    list_.remove('')
+    return list_
+
+def get_answers_as_text(l):
+    text_ = ''
+    for i in l:
+        text_ += i+';'
+    return text_
+
+
+
 
 def is_start(func):
     def func_arguments(*args, **kwargs):
@@ -69,8 +82,12 @@ def is_start(func):
                     a.delete()
             except:
                 csf = 0
-            if data == 'main_menu':
-                bot.delete_message(id, update.message.message_id)
+            if data == 'main_menu' or update.message.text == '/start':
+                try:
+                    bot.delete_message(id, update.message.message_id)
+                    bot.delete_message(id, update.message.message_id-1)
+                except:
+                    sth = 0
             main_menu(args[0], args[1])
             return ConversationHandler.END
         else:
