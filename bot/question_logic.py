@@ -66,7 +66,7 @@ def loop_answering(update, context):
         except:
             take_question(update, context)
             return CONTINUE_ANSWERING
-    elif not answer in l_q.qv and (l_ans.sn, l_ans.qn) != (2, 3) and (l_ans.sn, l_ans.qn) != (2, 4) and (l_ans.sn, l_ans.qn) != (2, 10)and (l_ans.sn, l_ans.qn) != (3, 2)and not ((l_ans.sn, l_ans.qn) in [(1, 2), (1, 3), (3, 3), (3, 4), (3, 5), (3, 6), (3, 7), (3, 8), (3, 9), (3, 10), (3, 11), (3, 12), (3, 13), (3, 14), (3, 15), (4, 2), (4, 4) ]):
+    elif not answer in l_q.qv and (l_ans.sn, l_ans.qn) != (2, 3) and (l_ans.sn, l_ans.qn) != (2, 4) and (l_ans.sn, l_ans.qn) != (2, 10)and (l_ans.sn, l_ans.qn) != (3, 2)and not ((l_ans.sn, l_ans.qn) in [(1, 2), (1, 3), (3, 3), (3, 4), (3, 5), (3, 6), (3, 7), (3, 8), (3, 9), (3, 10), (3, 11), (3, 12), (3, 13), (3, 14), (3, 15), (3, 1), (4, 2), (4, 4) ]):
         update.message.reply_text(get_word('send again', update))
         return 
     elif (l_ans.sn, l_ans.qn) == (1, 2):
@@ -171,7 +171,7 @@ def loop_answering(update, context):
             is_end = False
         answer = l_ans.ans
 
-    elif (l_ans.sn, l_ans.qn) in [(3, 8), (3, 9), (3, 10), (3, 11), (3, 12), (3, 13), (3, 14)]:
+    elif (l_ans.sn, l_ans.qn) in [(3, 8), (3, 9), (3, 10), (3, 11), (3, 12), (3, 13), (3, 14), (3, 15)]:
         if answer == get_word('next', update):
             q_3_1 = Question.objects.get(lang=user.lang, sn=3, qn=1)
             a_3_1 = Answer.objects.get(date=None, user__user_id=user.user_id, sn = 3, qn = 1)
@@ -217,6 +217,7 @@ def loop_answering(update, context):
 
     
     l_ans.ans = answer
+
     if is_end:
         l_ans.end = True
     l_ans.save()
@@ -272,7 +273,7 @@ def loop_answering(update, context):
                 # part.append(InlineKeyboardButton(text=v, callback_data='nothing'))
                 for i in range(1, len(var_answers)+1):
                     part.append(InlineKeyboardButton(text=str(i), callback_data='{}_{}_{}_{}'.format(q.sn, q.qn, v, i)))  # section number _ question nummber _ variant name _ answer
-                    if len(part) == 5:
+                    if len(part) == 6:
                         inline_button.append(part)
                         part = []        
                 inline_button.append(part)
@@ -335,9 +336,11 @@ def loop_answering(update, context):
                 keys.append(['✅ {}'.format(i)])
         keys.append([get_word('back', update), get_word('next', update)])
         keys.append([get_word('main menu', update)])
-        bot.delete_message(update.message.chat.id, update.message.message_id)
-        bot.delete_message(update.message.chat.id, update.message.message_id-1)
-
+        try:
+            bot.delete_message(update.message.chat.id, update.message.message_id)
+            bot.delete_message(update.message.chat.id, update.message.message_id-1)
+        except:
+            dda=0
         add_text += '\n\n\n<b>{}</b>\n'.format(get_word('your answers', update))
         for i in current_answers:
             add_text += '✅ <i>{}</i>;\n'.format(i)
@@ -443,7 +446,7 @@ def inline_answering(update, context):
                         part = []
                         for i in range(1, len(var_answers)+1):
                             part.append(InlineKeyboardButton(text=str(i), callback_data='{}_{}_{}_{}'.format(q.sn, q.qn, v, i)))  # section number _ question nummber _ variant name _ answer
-                            if len(part) == 5:
+                            if len(part) == 6:
                                 inline_button.append(part)
                                 part = []
                         add_text = '\n\n🔸   0️⃣     <b>{}</b>    🔟    🔹'.format(v)
@@ -473,6 +476,9 @@ def inline_answering(update, context):
 
             else:
                 keys = get_variants_for_buttons(q.qv)
+                if next_q == (1, 3):
+                    keys.insert(-1, [get_word('city_chirchik', update)])
+                    keys.insert(-1, [get_word('city_gulistan', update)])                
                 keys.append([get_word('back', update)])
                 keys.append([get_word('main menu', update)])
                 bot.send_message(update.message.chat.id, str(q.qd)+add_text, reply_markup=ReplyKeyboardMarkup(keyboard=keys, resize_keyboard=True))
@@ -507,6 +513,7 @@ def inline_answering(update, context):
                     current_answer.ans = ""
                     current_answer.save()
                     update.data = new_data
+                    
                     bot.delete_message(update.message.chat.id, update.message.message_id)
                     loop_answering(update, context)
                     if current_answer.sn == 2:
@@ -547,7 +554,7 @@ def inline_answering(update, context):
                                     part.append(InlineKeyboardButton(text=str(i) + '🔘', callback_data='{}_{}_{}_{}'.format(current_answer.sn, current_answer.qn, v, i)))  # section number _ question nummber _ variant name _ answer
                                 else:    
                                     part.append(InlineKeyboardButton(text=str(i), callback_data='{}_{}_{}_{}'.format(current_answer.sn, current_answer.qn, v, i)))  # section number _ question nummber _ variant name _ answer
-                                if len(part) == 5:
+                                if len(part) == 6:
                                     inline_button.append(part)
                                     part = []
                             add_text = '\n\n🔸   0️⃣     <b>{}</b>    🔟    🔹'.format(v)
@@ -675,11 +682,11 @@ def inline_answering(update, context):
                             part.append(InlineKeyboardButton(text=str(i) + '🔘', callback_data='{}_{}_{}_{}'.format(this_q.sn, this_q.qn, v, i)))  # section number _ question nummber _ variant name _ answer
                         else:
                             part.append(InlineKeyboardButton(text=str(i), callback_data='{}_{}_{}_{}'.format(this_q.sn, this_q.qn, v, i)))  # section number _ question nummber _ variant name _ answer
-                        if len(part) == 5:
+                        if len(part) == 6:
                             inline_button.append(part)
                             part = []
 
-                    inline_button.append(part)
+                    # inline_button.append(part)
                     add_text = '\n\n🔸   0️⃣     <b>{}</b>    🔟    🔹'.format(v)
                     index = variants.index(v) + 1
                 else:

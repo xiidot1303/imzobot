@@ -23,7 +23,7 @@ lang_dict = {
     
     'send again': ["""Variantlar ichidan tanlang """, """Выберите один из вариантов """],
     
-    'stop answering': ["""So'rovnoma yakunlandi """, """Завершения опрос """],
+    'stop answering': ["""So'rovnoma yakunlandi. Ishtirok etganingiz uchun raxmat! """, """Опрос завершён. Спасибо за участие! """],
     
     'error date': ["""Iltimos oy.yil  (03.2003) shaklida yozing """, """Напишите, пожалуйста, в формате мм.йййй (03.2003) """],
     
