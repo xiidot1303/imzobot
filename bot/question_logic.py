@@ -272,7 +272,7 @@ def loop_answering(update, context):
                 
                 # part.append(InlineKeyboardButton(text=v, callback_data='nothing'))
                 for i in range(1, len(var_answers)+1):
-                    part.append(InlineKeyboardButton(text=str(i), callback_data='{}_{}_{}_{}'.format(q.sn, q.qn, v, i)))  # section number _ question nummber _ variant name _ answer
+                    part.append(InlineKeyboardButton(text=str(i-1), callback_data='{}_{}_{}_{}'.format(q.sn, q.qn, v, i-1)))  # section number _ question nummber _ variant name _ answer
                     if len(part) == 6:
                         inline_button.append(part)
                         part = []        
@@ -445,7 +445,7 @@ def inline_answering(update, context):
                     for v in variants:
                         part = []
                         for i in range(1, len(var_answers)+1):
-                            part.append(InlineKeyboardButton(text=str(i), callback_data='{}_{}_{}_{}'.format(q.sn, q.qn, v, i)))  # section number _ question nummber _ variant name _ answer
+                            part.append(InlineKeyboardButton(text=str(i-1), callback_data='{}_{}_{}_{}'.format(q.sn, q.qn, v, i-1)))  # section number _ question nummber _ variant name _ answer
                             if len(part) == 6:
                                 inline_button.append(part)
                                 part = []
@@ -551,9 +551,9 @@ def inline_answering(update, context):
                             #     return                            
                             for i in range(1, len(var_answers)+1):
                                 if '{}={};'.format(v, i) in current_answer.ans:
-                                    part.append(InlineKeyboardButton(text=str(i) + '🔘', callback_data='{}_{}_{}_{}'.format(current_answer.sn, current_answer.qn, v, i)))  # section number _ question nummber _ variant name _ answer
+                                    part.append(InlineKeyboardButton(text=str(i-1) + '🔘', callback_data='{}_{}_{}_{}'.format(current_answer.sn, current_answer.qn, v, i-1)))  # section number _ question nummber _ variant name _ answer
                                 else:    
-                                    part.append(InlineKeyboardButton(text=str(i), callback_data='{}_{}_{}_{}'.format(current_answer.sn, current_answer.qn, v, i)))  # section number _ question nummber _ variant name _ answer
+                                    part.append(InlineKeyboardButton(text=str(i-1), callback_data='{}_{}_{}_{}'.format(current_answer.sn, current_answer.qn, v, i-1)))  # section number _ question nummber _ variant name _ answer
                                 if len(part) == 6:
                                     inline_button.append(part)
                                     part = []
@@ -679,9 +679,9 @@ def inline_answering(update, context):
     
                     for i in range(1, len(var_answers)+1):
                         if (str(i) == ans and v == vn) or '{}={};'.format(v, i) in l_ans.ans:
-                            part.append(InlineKeyboardButton(text=str(i) + '🔘', callback_data='{}_{}_{}_{}'.format(this_q.sn, this_q.qn, v, i)))  # section number _ question nummber _ variant name _ answer
+                            part.append(InlineKeyboardButton(text=str(i-1) + '🔘', callback_data='{}_{}_{}_{}'.format(this_q.sn, this_q.qn, v, i-1)))  # section number _ question nummber _ variant name _ answer
                         else:
-                            part.append(InlineKeyboardButton(text=str(i), callback_data='{}_{}_{}_{}'.format(this_q.sn, this_q.qn, v, i)))  # section number _ question nummber _ variant name _ answer
+                            part.append(InlineKeyboardButton(text=str(i-1), callback_data='{}_{}_{}_{}'.format(this_q.sn, this_q.qn, v, i-1)))  # section number _ question nummber _ variant name _ answer
                         if len(part) == 6:
                             inline_button.append(part)
                             part = []
