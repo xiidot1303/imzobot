@@ -550,7 +550,7 @@ def inline_answering(update, context):
                             #     bot.answer_callback_query(callback_query_id=update.id, text=get_word('click all', update), show_alert=True)
                             #     return                            
                             for i in range(1, len(var_answers)+1):
-                                if '{}={};'.format(v, i) in current_answer.ans:
+                                if '{}={};'.format(v, i-1) in current_answer.ans:
                                     part.append(InlineKeyboardButton(text=str(i-1) + '🔘', callback_data='{}_{}_{}_{}'.format(current_answer.sn, current_answer.qn, v, i-1)))  # section number _ question nummber _ variant name _ answer
                                 else:    
                                     part.append(InlineKeyboardButton(text=str(i-1), callback_data='{}_{}_{}_{}'.format(current_answer.sn, current_answer.qn, v, i-1)))  # section number _ question nummber _ variant name _ answer
@@ -678,7 +678,7 @@ def inline_answering(update, context):
                 if v in vn or vn in v:
     
                     for i in range(1, len(var_answers)+1):
-                        if (str(i) == ans and v == vn) or '{}={};'.format(v, i) in l_ans.ans:
+                        if (str(i-1) == ans and v == vn) or '{}={};'.format(v, i=1) in l_ans.ans:
                             part.append(InlineKeyboardButton(text=str(i-1) + '🔘', callback_data='{}_{}_{}_{}'.format(this_q.sn, this_q.qn, v, i-1)))  # section number _ question nummber _ variant name _ answer
                         else:
                             part.append(InlineKeyboardButton(text=str(i-1), callback_data='{}_{}_{}_{}'.format(this_q.sn, this_q.qn, v, i-1)))  # section number _ question nummber _ variant name _ answer
