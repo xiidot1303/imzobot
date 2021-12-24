@@ -54,14 +54,24 @@ def get_answers_excel(request, index):
             q_v_list = get_variants_as_list(v)
             q_v_a_list = get_variants_as_list(v_a)
             ans_list = variants_to_list(a.ans)
+            variants = []
+            ans_2_1 = Answer.objects.get(user__user_id = a.user.user_id, index = a.index, sn=2, qn = 1)
+            ans_l = variants_to_list(ans_2_1.ans)
+            for al in ans_l:
+                if int(ans_l[al]) != 4:
+                    variants.append(al)
 
         
             for i in ans_list:
+                
                 if ans_list[i]:
+
                     for x in list(ans_list[i].split(',')):
                         if x in q_v_a_list:
                             i_col = q_v_a_list.index(x)
-                            w.write(index_list[a.sn-1][a.qn-1] + int(i) - 1, 4+i_col, "✅")
+                            v_name = variants[int(i) - 1]
+                            i_row = q_v_list.index(v_name)
+                            w.write(index_list[a.sn-1][a.qn-1] + i_row, 4+i_col, "✅")
 
 
         elif not (a.sn==1 and a.qn == 2):
